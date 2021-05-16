@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.1.0"
+  },
+  "name": "swift-contracts",
+  "version": "1.0.0",
+  "description": "swift.finance",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blockchain-mistress/contracts.git"
+  },
+  "author": "blockchain.mistress",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/blockchain-mistress/contracts/issues"
+  },
+  "homepage": "https://github.com/blockchain-mistress/contracts#readme"
+}
