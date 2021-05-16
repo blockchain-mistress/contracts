@@ -1,6 +1,9 @@
-// File: contracts/KimochiToken.sol
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.0;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 // KimochiToken with Governance.
 contract SwiftToken is ERC20("SwiftToken", "SWIFT"), Ownable {
@@ -34,7 +37,7 @@ contract SwiftToken is ERC20("SwiftToken", "SWIFT"), Ownable {
 	}
 
 	function circulatingSupply() public view returns (uint256) {
-		return totalSupply().sub(_totalLock);
+		return totalSupply() - (_totalLock);
 	}
 
 	function totalLock() public view returns (uint256) {
@@ -52,7 +55,7 @@ contract SwiftToken is ERC20("SwiftToken", "SWIFT"), Ownable {
 		super._beforeTokenTransfer(from, to, amount);
 
 		if (from == address(0)) { // When minting tokens
-			require(totalSupply().add(amount) <= _cap, "ERC20Capped: cap exceeded");
+			require(totalSupply() + (amount) <= _cap, "ERC20Capped: cap exceeded");
 		}
 	}
 
@@ -88,12 +91,12 @@ contract SwiftToken is ERC20("SwiftToken", "SWIFT"), Ownable {
 		require(_amount > 0);
 		uint256 mintingAllowedAmount = minterAllowed[_to];
 		require(_amount <= mintingAllowedAmount);
-		minterAllowed[_to] = mintingAllowedAmount.sub(_amount);
+		minterAllowed[_to] = mintingAllowedAmount - (_amount);
 		_mint(_to, _amount);
 	}
 
 	function totalBalanceOf(address _holder) public view returns (uint256) {
-		return _locks[_holder].add(balanceOf(_holder));
+		return _locks[_holder] + (balanceOf(_holder));
 	}
 
 	function lockOf(address _holder) public view returns (uint256) {
@@ -110,8 +113,8 @@ contract SwiftToken is ERC20("SwiftToken", "SWIFT"), Ownable {
 
 		_transfer(_holder, address(this), _amount);
 
-		_locks[_holder] = _locks[_holder].add(_amount);
-		_totalLock = _totalLock.add(_amount);
+		_locks[_holder] = _locks[_holder] + (_amount);
+		_totalLock = _totalLock + (_amount);
 		if (_lastUnlockBlock[_holder] < lockFromBlock) {
 			_lastUnlockBlock[_holder] = lockFromBlock;
 		}
@@ -126,9 +129,9 @@ contract SwiftToken is ERC20("SwiftToken", "SWIFT"), Ownable {
 			return _locks[_holder];
 		}
 		else {
-			uint256 releaseBlock = block.number.sub(_lastUnlockBlock[_holder]);
-			uint256 numberLockBlock = lockToBlock.sub(_lastUnlockBlock[_holder]);
-			return _locks[_holder].mul(releaseBlock).div(numberLockBlock);
+			uint256 releaseBlock = block.number - (_lastUnlockBlock[_holder]);
+			uint256 numberLockBlock = lockToBlock - (_lastUnlockBlock[_holder]);
+			return _locks[_holder] * (releaseBlock) / (numberLockBlock);
 		}
 	}
 
@@ -141,14 +144,14 @@ contract SwiftToken is ERC20("SwiftToken", "SWIFT"), Ownable {
 			amount = balanceOf(address(this));
 		}
 		_transfer(address(this), msg.sender, amount);
-		_locks[msg.sender] = _locks[msg.sender].sub(amount);
+		_locks[msg.sender] = _locks[msg.sender] - (amount);
 		_lastUnlockBlock[msg.sender] = block.number;
-		_totalLock = _totalLock.sub(amount);
+		_totalLock = _totalLock - (amount);
 	}
 
 	// This function is for dev address migrate all balance to a multi sig address
 	function transferAll(address _to) public {
-		_locks[_to] = _locks[_to].add(_locks[msg.sender]);
+		_locks[_to] = _locks[_to] + (_locks[msg.sender]);
 
 		if (_lastUnlockBlock[_to] < lockFromBlock) {
 			_lastUnlockBlock[_to] = lockFromBlock;
@@ -186,7 +189,7 @@ contract SwiftToken is ERC20("SwiftToken", "SWIFT"), Ownable {
 	 * `amount`.
 	 */
 	function burnFrom(address account, uint256 amount) public virtual returns (bool) {
-		uint256 decreasedAllowance = allowance(account, _msgSender()).sub(amount, "ERC20: burn amount exceeds allowance");
+		uint256 decreasedAllowance = allowance(account, _msgSender()) - (amount);
 
 		_approve(account, _msgSender(), decreasedAllowance);
 		_burn(account, amount);
@@ -239,7 +242,7 @@ contract SwiftToken is ERC20("SwiftToken", "SWIFT"), Ownable {
 		farmingEnabled = true;
 	}
 
-	constructor() public {
+	constructor(){
 		lockFromBlock = 999999999;
 		lockToBlock = 999999999;
 		farmingEnabled = false;
